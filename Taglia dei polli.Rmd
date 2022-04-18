@@ -1,0 +1,79 @@
+---
+title: "Taglia dei polli"
+author: "Pietro"
+date: "4/18/2022"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, echo=FALSE, message=FALSE, fig.width=12, fig.height=5}
+library(tidyverse)
+
+d <-  tibble(year=c(1957, 1978, 2005), 
+             size=c(905, 1808, 4202))
+g <- ggplot(d, aes(x=year, y=size))
+gg <- g + geom_point()
+gg
+```
+
+Sembrerebbe esserci una crescita della taglia in base agli anni. Vediamo se è statisticamente significativa, cioè se i dati hanno abbastanza "informazione" per poter dire che questo aumento sia in relazione agli anni.
+Applichiamo una serie di modelli lineari generalizzati per verificarlo.
+
+#LINEARE
+
+
+```{r, fig.height=5}
+# linear
+lin <- lm(size~year, data=d)
+gg + geom_smooth(method='lm', formula= y~x) + 
+  ggtitle("La taglia cresce linearmente con gli anni")
+
+
+#quadratic
+```
+```{r}
+summary(lin)
+```
+
+Seppur il grafico possa indicare diversamente, *Pr(>|t|)* per *year* dovrebbero essere quantomeno più piccolo di 0.1 per indicare un effetto significativo della variabile "anno" sulla taglia. Perciò, questo modello non è significativamente migliore di un modello con solo intercetta, cioè dove gli anni non hanno alcuina influenza.
+
+Purtroppo, non ci sono abbastanza dati perché un modello quadratico completo (con interceta, termine lineare e termine quadratico) possa essere costruito sui dati. Questo perché i parametri da stimare sarebbero 3 su 3 osservazioni.
+Quello che si può fare è stimare un modello quadratico privo di effetto lineare, del tipo *taglia = a + b anno^2*.
+
+```{r, fig.height=5}
+
+quad <- lm(size~I(year^2), data=d)
+gg + geom_smooth(method='lm', formula= y~I(x^2)) + 
+  ggtitle("La taglia cresce quadratica con gli anni")
+
+```
+
+Graficamente, si nota che non c'è differenza con quello precedente, Infatti, non poter inserire il termine lineare "rovina" la forma che intuitivamente un modello quadratico dovrebbe avere.
+Anche l'analisi dei residui dice che sto modello fa schifetto.
+
+```{r}
+
+summary(quad)
+```
+
+Possiamo barare, stimando comunque i coefficienti di un modello quadratico completo MA NON E' STATISTICAMENTE SENSATO.
+```{r, fig.height=5}
+compl <- lm(size~ year + I(year^2), data=d)
+plot(d, pch=19, main="Modello quadratico completo (DEPRECATED)")
+xx <- seq(1950, 2006, length.out=1000)
+yy <- predict(compl, newdata=data.frame(year=xx))
+points(xx,yy, type="l", lty=2, col=2)
+```
+
+Sulla base di questo (che mostra, graficamente, buon adattamento), possiamo produrre delle stime delle taglie di oggi, **2022** e 50 anni fa, **1972**.
+
+```{r}
+size72 <- predict(compl, newdata=data.frame(year=1972))
+size22 <- predict(compl, newdata=data.frame(year=2022))
+aumento <-  size22 * 100 / size72
+````
+L 'aumento parrebbe essere del 438% , ma è puramente descrittivo e **non ha alcun valore sulla base dei dati a disposizione**.
+Possiamo quindi concludere che il tweet riportasse informazione fuorviante. 
