@@ -6,6 +6,6 @@ I came across a tweet stating _"The size of chickens you are eating has increase
  
 You can notice that the data they give says something else: there is not +364% between 1957 and 2005. Then, the question was: maybe he applyed a model on the data to estimante the size in 1972 and in 2022 to obtain that percentuage increase. I tried to do that and the results are reported in this markdown assuming the data they provide is verified.
 
-##CONCLUSION
+CONCLUSION
 
 Before scaring people about health issues you should be sure about the informations you have.
